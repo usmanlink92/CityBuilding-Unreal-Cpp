@@ -5,6 +5,7 @@
 #include "MyPawn.h"
 #include "Objects/MyBuildingActor.h"
 #include "Objects/RoadTileActor.h"
+#include "Objects/HouseTileActor.h"
 #include "Objects/GridManagerActor.h"
 #include "Objects/GridCellActor.h"
 #include "Components/PlaceableAComponent.h"
@@ -61,7 +62,7 @@ void AMyPlayerController::SetupInputComponent()
     InputComponent->BindAction("MiddleMouse", IE_Pressed, this, &AMyPlayerController::MiddleMousePressed);
     InputComponent->BindAction("MiddleMouse", IE_Released, this, &AMyPlayerController::MiddleMouseReleased);
 
-    InputComponent->BindAction("SpawnBuilding", IE_Released, this, &AMyPlayerController::SpawnCustomActor);
+    //InputComponent->BindAction("SpawnBuilding", IE_Released, this, &AMyPlayerController::SpawnCustomActor);
     InputComponent->BindAction("MouseLeftCLick", IE_Released, this, &AMyPlayerController::DropActorAtLocation);
     InputComponent->BindAction("MouseRightClick", IE_Released, this, &AMyPlayerController::CancelActorSpawn);
 
@@ -157,7 +158,7 @@ void AMyPlayerController::ScrollDown()
     PlayerCharacter->SetSpringArm(+10.f);
 }
 
-void AMyPlayerController::SpawnCustomActor()
+void AMyPlayerController::SpawnCustomActor(EBuildingType Type)
 {
     GLog->Log(TEXT("AMyPlayerController::SpawnCustomActor()"));
     if (!InPlacementMode)
@@ -166,8 +167,19 @@ void AMyPlayerController::SpawnCustomActor()
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         FVector _SpawnLocation = FVector::ZeroVector;
         _SpawnLocation.Z = -1000.f;
-        PlaceableActor = GetWorld()->SpawnActor<ARoadTileActor>(ARoadTileActor::StaticClass(), _SpawnLocation, FRotator::ZeroRotator, SpawnParams);
-        PlaceableActor->BuildingType = EBuildingType::E_Road;
+        TSubclassOf<APlaceableActorBase> PlaceableActorClassType;
+        switch (Type)
+        {
+        case EBuildingType::E_Road:
+            PlaceableActorClassType = ARoadTileActor::StaticClass();
+        break;
+
+        case EBuildingType::E_House:
+            PlaceableActorClassType = AHouseTileActor::StaticClass();
+            break;
+        }
+        PlaceableActor = GetWorld()->SpawnActor<APlaceableActorBase>(PlaceableActorClassType, _SpawnLocation, FRotator::ZeroRotator, SpawnParams);
+        PlaceableActor->BuildingType = Type;
         InPlacementMode = true;
     }
 }
@@ -179,6 +191,7 @@ void AMyPlayerController::DropActorAtLocation()
     {
         InPlacementMode = false;
         PlaceableActor->OnActorPlaced();
+        PlaceableActor = nullptr;
     }
 }
 
@@ -206,9 +219,9 @@ void AMyPlayerController::UpdatePosition()
             if (OutHit.bBlockingHit)
             {
                 GLog->Log(TEXT("AMyPlayerController::SetActorLocation()"));
-                //BaseCellToBe : Will be NULL only if Grid Manager have nothing / have zero base cells
+                //BaseCellToBe : Will be NULL only if Grid Manager have nothing / have zero cells
                 AGridCellActor* BaseCellToBe = Cast<AGridCellActor>(GridManagerActor->GetClosestPosition(OutHit.Location));
-                if(BaseCellToBe->IsValidForType(PlaceableActor->BuildingType))
+                if(BaseCellToBe->CellValidForType(PlaceableActor->BuildingType))
                 {
                     //This 'if' cannot be combined with upper one, as upper one decides to return
                     if (PlaceableActor->BaseCell != BaseCellToBe)
@@ -224,7 +237,7 @@ void AMyPlayerController::UpdatePosition()
                     }
                     return;
                 }
-                PlaceableActor->BaseCell = BaseCellToBe;
+                //Set invalid Location, with red color
                 PlaceableActor->SetActorLocation(OutHit.Location);
             }
         }
@@ -232,12 +245,8 @@ void AMyPlayerController::UpdatePosition()
         if (PlaceableActor->IsPlacementValid)
         {
             PlaceableActor->IsPlacementValid = false;
+            PlaceableActor->BaseCell = nullptr;
             PlaceableActor->SetMaterial(UConstants::GetMaterial(EColors::E_Red));
         }
     }
-}
-
-void AMyPlayerController::OnActorPlaced(APlaceableActorBase* Building)
-{
-    GLog->Log(TEXT("AMyPlayerController::OnActorPlaced()"));
 }

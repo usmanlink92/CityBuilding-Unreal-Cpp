@@ -30,7 +30,6 @@ public:
 
 	UMaterialInterface* BaseMaterial;
 	virtual void SetMaterial(UMaterialInterface* Material) { BaseMaterial = Material; };
-	//virtual void RoadAtNorth();
 
 	uint8 OverlappedActorsCount = 0;
 
@@ -38,6 +37,8 @@ public:
 	class UClickableAComponent* ClickableComponent;
 	class UPlaceableAComponent* PlaceableComponent;
 	class AGridCellActor* BaseCell;
+
+	//This is set on SpawnActor
 	EBuildingType BuildingType = EBuildingType::E_None;
 
 private:

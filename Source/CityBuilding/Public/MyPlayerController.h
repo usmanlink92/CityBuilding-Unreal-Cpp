@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Utils/Enums.h"
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
 
@@ -34,11 +35,8 @@ class AMyPlayerController : public APlayerController
     void MouseX(float);
     void MouseY(float);
 
-    void SpawnCustomActor();
     void DropActorAtLocation();
-    void CancelActorSpawn();
     void UpdatePosition();
-    void OnActorPlaced(class APlaceableActorBase*);
 
     bool MiddleMousePress = false;
     bool InPlacementMode = false;
@@ -49,4 +47,8 @@ class AMyPlayerController : public APlayerController
 
     FVector LastWorldLocation = FVector::ZeroVector;
     FVector LastWorldDirection = FVector::ZeroVector;
+
+public:
+    void SpawnCustomActor(EBuildingType);
+    void CancelActorSpawn();
 };

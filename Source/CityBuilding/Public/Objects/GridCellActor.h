@@ -27,33 +27,89 @@ public:
 	class APlaceableActorBase* OccupyingActor;
 	EBuildingType BuildingType = EBuildingType::E_None;
 
+	TMap<const EBuildingType, bool> LocationValidFor = { {EBuildingType::E_Road, true}, {EBuildingType::E_House, true} };
+
+	void OnActorPlaced(class APlaceableActorBase*);
 	//Check whether is this cell Valid for passed argument type of building?
-	const bool IsValidForType(const EBuildingType& Type) const
+	const bool CellValidForType(const EBuildingType& Type) const
 	{
-		GLog->Log(FString::Printf(TEXT("AGridCellActor::IsValidCell() | Actor:%s | Cell:%s"), *UEnum::GetValueAsString(Type), *UEnum::GetValueAsString(BuildingType)));
-		if(!OccupyingActor)
+		if (OccupyingActor) return false;
+		return LocationValidFor[Type];
+	}
+
+	void SetNeighborAvaiablility(AGridCellActor* AdjacentNeighbor, const EBuildingType& TypeToCheck)
+	{
+		if (AdjacentNeighbor)
 		{
-			if (Type == EBuildingType::E_Road)
+			AdjacentNeighbor->LocationValidFor[TypeToCheck] = AdjacentNeighbor->NeighborValidForType(TypeToCheck);
+			if (TypeToCheck == EBuildingType::E_Road)
 			{
-				if (North && North->OccupyingActor && East && East->OccupyingActor && North->East && North->East->OccupyingActor)
+				//North-East / South-East
+				if (AdjacentNeighbor->East)
 				{
-					return false;
+					AdjacentNeighbor->LocationValidFor[TypeToCheck] = AdjacentNeighbor->NeighborValidForType(TypeToCheck);
 				}
-				if (North && North->OccupyingActor && West && West->OccupyingActor && North->West && North->West->OccupyingActor)
+				//North-West / South-West
+				if (AdjacentNeighbor->West)
 				{
-					return false;
+					AdjacentNeighbor->LocationValidFor[TypeToCheck] = AdjacentNeighbor->NeighborValidForType(TypeToCheck);
 				}
-				if (South && South->OccupyingActor && East && East->OccupyingActor && South->East && South->East->OccupyingActor)
-				{
-					return false;
-				}
-				if (South && South->OccupyingActor && West && West->OccupyingActor && South->West && South->West->OccupyingActor)
-				{
-					return false;
-				}
-				return true;
 			}
+		}
+	}
+
+	const bool NeighborValidForType(const EBuildingType& Type) const
+	{
+		if (!OccupyingActor)
+		{
+			if (North && North->BuildingType == Type && North->OccupyingActor && East && East->BuildingType == Type && East->OccupyingActor && North->East)
+			{
+				if (Type == EBuildingType::E_Road && North->East->BuildingType == Type && North->East->OccupyingActor)
+				{
+					return false;
+				}
+				else if (Type == EBuildingType::E_House)
+				{
+					return false;
+				}
+			}
+			if (North && North->BuildingType == Type && North->OccupyingActor && West && West->BuildingType == Type && West->OccupyingActor && North->West)
+			{
+				if (Type == EBuildingType::E_Road && North->West->BuildingType == Type && North->West->OccupyingActor)
+				{
+					return false;
+				}
+				else if (Type == EBuildingType::E_House)
+				{
+					return false;
+				}
+			}
+			if (South && South->BuildingType == Type && South->OccupyingActor && East && East->BuildingType == Type && East->OccupyingActor && South->East)
+			{
+				if (Type == EBuildingType::E_Road && South->East->BuildingType == Type && South->East->OccupyingActor)
+				{
+					return false;
+				}
+				else if (Type == EBuildingType::E_House)
+				{
+					return false;
+				}
+			}
+			if (South && South->BuildingType == Type && South->OccupyingActor && West && West->BuildingType == Type && West->OccupyingActor && South->West)
+			{
+				if (Type == EBuildingType::E_Road && South->West->BuildingType == Type && South->West->OccupyingActor)
+				{
+					return false;
+				}
+				else if (Type == EBuildingType::E_House)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 		return false;
 	}
+
+
 };

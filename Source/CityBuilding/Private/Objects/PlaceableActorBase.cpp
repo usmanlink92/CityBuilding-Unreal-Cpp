@@ -78,58 +78,6 @@ void APlaceableActorBase::DestroyPlaceableComponent()
 void APlaceableActorBase::OnActorPlaced()
 {
 	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::%d::OnActorPlaced()"), UniqueId));
-
-	BaseCell->OccupyingActor = this;
-	BaseCell->BuildingType = BuildingType;
-	switch (BuildingType)
-	{
-	case EBuildingType::E_Road:
-	{
-		if (BaseCell->North && BaseCell->North->OccupyingActor && BaseCell->North->BuildingType == BuildingType)
-		{
-			if (ARoadTileActor* Self = Cast<ARoadTileActor>(this))
-			{
-				Self->NorthPavement->SetVisibility(false);
-				if (ARoadTileActor* North = Cast<ARoadTileActor>(BaseCell->North->OccupyingActor))
-				{
-					North->SouthPavement->SetVisibility(false);
-				}
-			}
-		}
-		if (BaseCell->South && BaseCell->South->OccupyingActor && BaseCell->South->BuildingType == BuildingType)
-		{
-			if (ARoadTileActor* Self = Cast<ARoadTileActor>(this))
-			{
-				Self->SouthPavement->SetVisibility(false);
-				if (ARoadTileActor* South = Cast<ARoadTileActor>(BaseCell->South->OccupyingActor))
-				{
-					South->NorthPavement->SetVisibility(false);
-				}
-			}
-		}
-		if (BaseCell->East && BaseCell->East->OccupyingActor && BaseCell->East->BuildingType == BuildingType)
-		{
-			if (ARoadTileActor* Self = Cast<ARoadTileActor>(this))
-			{
-				Self->EastPavement->SetVisibility(false);
-				if (ARoadTileActor* East = Cast<ARoadTileActor>(BaseCell->East->OccupyingActor))
-				{
-					East->WestPavement->SetVisibility(false);
-				}
-			}
-		}
-		if (BaseCell->West && BaseCell->West->OccupyingActor && BaseCell->West->BuildingType == BuildingType)
-		{
-			if (ARoadTileActor* Self = Cast<ARoadTileActor>(this))
-			{
-				Self->WestPavement->SetVisibility(false);
-				if (ARoadTileActor* West = Cast<ARoadTileActor>(BaseCell->West->OccupyingActor))
-				{
-					West->EastPavement->SetVisibility(false);
-				}
-			}
-		}
-	}
-	break;
-	}
+	//Placement Confirmed, update Neighbor Cells
+	BaseCell->OnActorPlaced(this);
 }
