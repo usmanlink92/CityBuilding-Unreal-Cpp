@@ -4,9 +4,10 @@
 #include "MyPlayerController.h"
 #include "MyPawn.h"
 #include "Objects/MyBuildingActor.h"
-#include "Components/PlaceableAComponent.h"
+#include "Objects/RoadTileActor.h"
 #include "Objects/GridManagerActor.h"
 #include "Objects/GridCellActor.h"
+#include "Components/PlaceableAComponent.h"
 
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -165,31 +166,28 @@ void AMyPlayerController::SpawnCustomActor()
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         FVector _SpawnLocation = FVector::ZeroVector;
         _SpawnLocation.Z = -1000.f;
-        PlaceableActor = GetWorld()->SpawnActor<AMyBuildingActor>(AMyBuildingActor::StaticClass(), _SpawnLocation, FRotator::ZeroRotator, SpawnParams);
-        PlaceableActor->AttachPlaceableComponent();
+        PlaceableActor = GetWorld()->SpawnActor<ARoadTileActor>(ARoadTileActor::StaticClass(), _SpawnLocation, FRotator::ZeroRotator, SpawnParams);
+        PlaceableActor->BuildingType = EBuildingType::E_Road;
         InPlacementMode = true;
     }
 }
 
 void AMyPlayerController::DropActorAtLocation()
 {
-    GLog->Log(TEXT("AMyPlayerController::DropActorAtLocation()"));
-    if (InPlacementMode && PlaceableActor->PlaceableComponent && PlaceableActor->PlaceableComponent->IsPlacementValid)
+    GLog->Log(TEXT("AMyPlayerController::LeftClick()"));
+    if (InPlacementMode && PlaceableActor->IsPlacementValid)
     {
         InPlacementMode = false;
-        PlaceableActor->DestroyPlaceableComponent();
-        PlaceableActor->AttachClickableComponent();
-        OnActorPlaced(PlaceableActor);
+        PlaceableActor->OnActorPlaced();
     }
 }
 
 void AMyPlayerController::CancelActorSpawn()
 {
-    GLog->Log(TEXT("AMyPlayerController::CancelActorSpawn()"));
+    GLog->Log(TEXT("AMyPlayerController::RightClick()"));
     if (InPlacementMode)
     {
         InPlacementMode = false;
-        PlaceableActor->DestroyPlaceableComponent();
         PlaceableActor->Destroy();
     }
 }
@@ -207,35 +205,39 @@ void AMyPlayerController::UpdatePosition()
         {
             if (OutHit.bBlockingHit)
             {
-                if (GridManagerActor)
+                GLog->Log(TEXT("AMyPlayerController::SetActorLocation()"));
+                //BaseCellToBe : Will be NULL only if Grid Manager have nothing / have zero base cells
+                AGridCellActor* BaseCellToBe = Cast<AGridCellActor>(GridManagerActor->GetClosestPosition(OutHit.Location));
+                if(BaseCellToBe->IsValidForType(PlaceableActor->BuildingType))
                 {
-                    GLog->Log(TEXT("AMyPlayerController::SetActorLocation()"));
-                    PlaceableActor->BaseCell = Cast<AGridCellActor>(GridManagerActor->GetClosestPosition(OutHit.Location));
-                    if (PlaceableActor->BaseCell)
+                    //This 'if' cannot be combined with upper one, as upper one decides to return
+                    if (PlaceableActor->BaseCell != BaseCellToBe)
                     {
+                        PlaceableActor->BaseCell = BaseCellToBe;
+                        //Actor can move from one valid cell to another valid cell, so we Need to update Location irrespective of IsPlacementValid
                         PlaceableActor->SetActorLocation(PlaceableActor->BaseCell->GetActorLocation());
+                        if (!PlaceableActor->IsPlacementValid)
+                        {
+                            PlaceableActor->IsPlacementValid = true;
+                            PlaceableActor->SetMaterial(UConstants::GetMaterial(EColors::E_Grey));
+                        }
                     }
-                    else
-                    {
-                        PlaceableActor->SetActorLocation(OutHit.Location);
-                    }
+                    return;
                 }
-                else
-                {
-                    PlaceableActor->SetActorLocation(OutHit.Location);
-                }
+                PlaceableActor->BaseCell = BaseCellToBe;
+                PlaceableActor->SetActorLocation(OutHit.Location);
             }
+        }
+
+        if (PlaceableActor->IsPlacementValid)
+        {
+            PlaceableActor->IsPlacementValid = false;
+            PlaceableActor->SetMaterial(UConstants::GetMaterial(EColors::E_Red));
         }
     }
 }
 
-void AMyPlayerController::OnActorPlaced(AMyBuildingActor* Building)
+void AMyPlayerController::OnActorPlaced(APlaceableActorBase* Building)
 {
     GLog->Log(TEXT("AMyPlayerController::OnActorPlaced()"));
-    if(Building->BaseCell->North)Building->BaseCell->North->Mesh->SetMaterial(0, Building->BaseCell->BlackMaterial);
-    if(Building->BaseCell->South)Building->BaseCell->South->Mesh->SetMaterial(0, Building->BaseCell->BlackMaterial);
-    if(Building->BaseCell->East)Building->BaseCell->East->Mesh->SetMaterial(0, Building->BaseCell->BlackMaterial);
-    if(Building->BaseCell->West)Building->BaseCell->West->Mesh->SetMaterial(0, Building->BaseCell->BlackMaterial);
-    Building->BaseCell->OccupyingActor = Building;
-    Building->BaseCell->BuildingType = EBuildingType::E_House;
 }

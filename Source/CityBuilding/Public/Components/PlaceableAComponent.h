@@ -40,7 +40,7 @@ private:
 
 public:
 	bool IsPlacementValid = false;
-	class AMyBuildingActor* BuildingParent = nullptr;
+	class APlaceableActorBase* BuildingParent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UMaterialInterface* ValidStateMaterial;

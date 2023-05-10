@@ -12,7 +12,7 @@ class CITYBUILDING_API AGridManagerActor : public AActor
 	GENERATED_BODY()
 
 private:
-	int CellSize = 1000;
+	int CellSize = 100;
 	int GridLength = 10;
 	TArray<class AGridCellActor*> Grid;
 
@@ -23,9 +23,6 @@ protected:
 public:	
 	// Sets default values for this actor's properties
 	AGridManagerActor();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class USceneComponent* Root;
 
 	AActor* GetClosestPosition(const FVector InPosition);
 	void PopulateGridNeighbors();

@@ -18,4 +18,14 @@ public:
 	// Sets default values for this actor's properties
 	AEmptyActor();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class USceneComponent* Root;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* Mesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UStaticMesh* DefaultMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UMaterialInterface* DefaultMaterial;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UMaterialInterface* BlackMaterial;
 };

@@ -19,23 +19,41 @@ public:
 	// Sets default values for this actor's properties
 	AGridCellActor();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class USceneComponent* Root;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class UStaticMeshComponent* Mesh;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class UStaticMesh* DefaultMesh;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class UMaterialInterface* DefaultMaterial;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class UMaterialInterface* BlackMaterial;
-
 	class AGridCellActor* North;
 	class AGridCellActor* South;
 	class AGridCellActor* East;
 	class AGridCellActor* West;
 
-	class AActor* OccupyingActor;
-
+	class APlaceableActorBase* OccupyingActor;
 	EBuildingType BuildingType = EBuildingType::E_None;
+
+	//Check whether is this cell Valid for passed argument type of building?
+	const bool IsValidForType(const EBuildingType& Type) const
+	{
+		GLog->Log(FString::Printf(TEXT("AGridCellActor::IsValidCell() | Actor:%s | Cell:%s"), *UEnum::GetValueAsString(Type), *UEnum::GetValueAsString(BuildingType)));
+		if(!OccupyingActor)
+		{
+			if (Type == EBuildingType::E_Road)
+			{
+				if (North && North->OccupyingActor && East && East->OccupyingActor && North->East && North->East->OccupyingActor)
+				{
+					return false;
+				}
+				if (North && North->OccupyingActor && West && West->OccupyingActor && North->West && North->West->OccupyingActor)
+				{
+					return false;
+				}
+				if (South && South->OccupyingActor && East && East->OccupyingActor && South->East && South->East->OccupyingActor)
+				{
+					return false;
+				}
+				if (South && South->OccupyingActor && West && West->OccupyingActor && South->West && South->West->OccupyingActor)
+				{
+					return false;
+				}
+				return true;
+			}
+		}
+		return false;
+	}
 };

@@ -38,13 +38,13 @@ class AMyPlayerController : public APlayerController
     void DropActorAtLocation();
     void CancelActorSpawn();
     void UpdatePosition();
-    void OnActorPlaced(class AMyBuildingActor*);
+    void OnActorPlaced(class APlaceableActorBase*);
 
     bool MiddleMousePress = false;
     bool InPlacementMode = false;
 
     class AMyPawn* PlayerCharacter;
-    class AMyBuildingActor* PlaceableActor;
+    class APlaceableActorBase* PlaceableActor;
     class AGridManagerActor* GridManagerActor;
 
     FVector LastWorldLocation = FVector::ZeroVector;
