@@ -30,7 +30,6 @@ void UClickableAComponent::BeginPlay()
 	GetOwner()->OnBeginCursorOver.AddDynamic(this, &UClickableAComponent::OnActorHoverStart);
 	GetOwner()->OnEndCursorOver.AddDynamic(this, &UClickableAComponent::OnActorHoverEnd);
 	ControlledStaticMesh = Cast<UStaticMeshComponent>(GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-
 }
 
 
@@ -46,7 +45,6 @@ void UClickableAComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 void UClickableAComponent::OnActorClicked(AActor* TouchedActor, FKey ButtonPressed)
 {
 	GLog->Log(TEXT("UClickableAComponent::OnActorClicked()"));
-	isClicked = !isClicked;
 	ControlledStaticMesh->SetMaterial(0, BaseColorMaterials[FMath::RandRange(0,3)]);
 }
 void UClickableAComponent::OnActorHoverStart(AActor* TouchedActor)

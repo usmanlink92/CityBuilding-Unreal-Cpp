@@ -109,5 +109,5 @@ void AMyPawn::SetSpringArm(const float& Change)
 void AMyPawn::UpdateMoveSpeed()
 {
     GLog->Log(TEXT("AMyPawn::UpdateMoveSpeed()"));
-    MoveSpeed = (SpringArmLength / MinSpringArmLength) * 150.f;
+    MoveSpeed = (SpringArmLength / MinSpringArmLength) * 300.f;
 }

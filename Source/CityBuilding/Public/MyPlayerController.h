@@ -35,10 +35,13 @@ class AMyPlayerController : public APlayerController
     void MouseY(float y);
 
     void SpawnCustomActor();
+    void DropActorAtLocation();
+    void CancelActorSpawn();
+    void UpdatePosition();
 
     bool MiddleMousePress = false;
+    bool InPlacementMode = false;
 
     class AMyPawn* PlayerCharacter;
-
-    class AMyBuildingActor* ExampleActor;
+    class AMyBuildingActor* PlaceableActor;
 };

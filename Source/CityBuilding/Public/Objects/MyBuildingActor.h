@@ -10,7 +10,9 @@ UCLASS()
 class CITYBUILDING_API AMyBuildingActor : public AActor
 {
 	GENERATED_BODY()
-	
+
+	int32 UniqueId = 0;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -23,6 +25,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* Mesh;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UStaticMesh* DefaultMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UMaterialInterface* DefaultMaterial;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -34,5 +38,10 @@ public:
 	void DestroyClickableComponent();
 	void AttachPlaceableComponent();
 	void DestroyPlaceableComponent();
-	int type = 0;
+
+	uint8 OverlappedActorsCount = 0;
+	UFUNCTION()
+	void OnActorOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
+	UFUNCTION()
+	void OnActorOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
 };

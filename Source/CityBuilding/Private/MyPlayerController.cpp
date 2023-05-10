@@ -4,6 +4,7 @@
 #include "MyPlayerController.h"
 #include "MyPawn.h"
 #include "Objects/MyBuildingActor.h"
+#include "Components/PlaceableAComponent.h"
 
 void AMyPlayerController::BeginPlay()
 {
@@ -18,6 +19,10 @@ void AMyPlayerController::BeginPlay()
 void AMyPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    if (InPlacementMode)
+    {
+        UpdatePosition();
+    }
 }
 
 void AMyPlayerController::BeginPlayingState()
@@ -42,12 +47,15 @@ void AMyPlayerController::SetupInputComponent()
     InputComponent->BindAction("MoveRight", IE_Released, this, &AMyPlayerController::StopMoveRight);
     InputComponent->BindAction("MoveLeft", IE_Pressed, this, &AMyPlayerController::MoveLeft);
     InputComponent->BindAction("MoveLeft", IE_Released, this, &AMyPlayerController::StopMoveLeft);
+
     InputComponent->BindAction("ScrollUp", IE_Released, this, &AMyPlayerController::ScrollUp);
     InputComponent->BindAction("ScrollDown", IE_Released, this, &AMyPlayerController::ScrollDown);
     InputComponent->BindAction("MiddleMouse", IE_Pressed, this, &AMyPlayerController::MiddleMousePressed);
     InputComponent->BindAction("MiddleMouse", IE_Released, this, &AMyPlayerController::MiddleMouseReleased);
 
     InputComponent->BindAction("SpawnBuilding", IE_Released, this, &AMyPlayerController::SpawnCustomActor);
+    InputComponent->BindAction("MouseLeftCLick", IE_Released, this, &AMyPlayerController::DropActorAtLocation);
+    InputComponent->BindAction("MouseRightClick", IE_Released, this, &AMyPlayerController::CancelActorSpawn);
 
     InputComponent->BindAxis("MouseX", this, &AMyPlayerController::MouseX);
     InputComponent->BindAxis("MouseY", this, &AMyPlayerController::MouseY);
@@ -144,8 +152,53 @@ void AMyPlayerController::ScrollDown()
 void AMyPlayerController::SpawnCustomActor()
 {
     GLog->Log(TEXT("AMyPlayerController::SpawnCustomActor()"));
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-    ExampleActor = GetWorld()->SpawnActor<AMyBuildingActor>(AMyBuildingActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-    ExampleActor->AttachClickableComponent();
+    if (!InPlacementMode)
+    {
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        FVector _SpawnLocation = FVector::ZeroVector;
+        _SpawnLocation.Z = -1000.f;
+        PlaceableActor = GetWorld()->SpawnActor<AMyBuildingActor>(AMyBuildingActor::StaticClass(), _SpawnLocation, FRotator::ZeroRotator, SpawnParams);
+        PlaceableActor->AttachPlaceableComponent();
+        InPlacementMode = true;
+    }
+}
+
+void AMyPlayerController::DropActorAtLocation()
+{
+    GLog->Log(TEXT("AMyPlayerController::DropActorAtLocation()"));
+    if (InPlacementMode && PlaceableActor->PlaceableComponent && PlaceableActor->PlaceableComponent->IsPlacementValid)
+    {
+        InPlacementMode = false;
+        PlaceableActor->DestroyPlaceableComponent();
+        PlaceableActor->AttachClickableComponent();
+    }
+}
+
+void AMyPlayerController::CancelActorSpawn()
+{
+    GLog->Log(TEXT("AMyPlayerController::CancelActorSpawn()"));
+    if (InPlacementMode)
+    {
+        InPlacementMode = false;
+        PlaceableActor->DestroyPlaceableComponent();
+        PlaceableActor->Destroy();
+    }
+}
+
+void AMyPlayerController::UpdatePosition()
+{
+    FVector WorldLocation;
+    FVector WorldDirection;
+    FHitResult OutHit;
+    if (DeprojectMousePositionToWorld(WorldLocation, WorldDirection))
+    {
+        if (GetWorld()->LineTraceSingleByChannel(OutHit, WorldLocation, (WorldLocation + (WorldDirection * 50000)), ECollisionChannel::ECC_GameTraceChannel1))
+        {
+            if (OutHit.bBlockingHit)
+            {
+                PlaceableActor->SetActorLocation(OutHit.Location);
+            }
+        }
+    }
 }
