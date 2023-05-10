@@ -24,7 +24,7 @@ public:
 	// Sets default values for this actor's properties
 	AGridManagerActor();
 
-	AActor* GetClosestPosition(const FVector InPosition);
+	AActor* GetClosestPosition(const FVector&);
 	void PopulateGridNeighbors();
 
 };

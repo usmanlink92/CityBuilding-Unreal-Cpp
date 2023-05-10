@@ -1,18 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "Objects/PlaceableActorBase.h"
 #include "Objects/GridCellActor.h"
-#include "Objects/RoadTileActor.h"
-#include "Components/ClickableAComponent.h"
-#include "Components/PlaceableAComponent.h"
-
-#include "Components/SceneComponent.h"
-#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 APlaceableActorBase::APlaceableActorBase()
 {
-	UniqueId = FMath::Rand();
-	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::%d::APlaceableActorBase()"), UniqueId));
+	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::APlaceableActorBase()")));
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
@@ -22,62 +15,12 @@ APlaceableActorBase::APlaceableActorBase()
 void APlaceableActorBase::BeginPlay()
 {
 	Super::BeginPlay();
-	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::%d::BeginPlay()"), UniqueId));
-}
-
-// Called every frame
-void APlaceableActorBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-void APlaceableActorBase::OnActorOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
-{
-	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::%d::OnActorOverlapBegin()"), UniqueId));
-	OverlappedActorsCount++;
-}
-
-void APlaceableActorBase::OnActorOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
-{
-	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::%d::OnActorOverlapEnd()"), UniqueId));
-	OverlappedActorsCount--;
-}
-
-void APlaceableActorBase::AttachClickableComponent()
-{
-	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::%d::AttachClickableComponent()"), UniqueId));
-	ClickableComponent = NewObject<UClickableAComponent>(this, UClickableAComponent::StaticClass(), FName("Clickable Component"));
-	ClickableComponent->RegisterComponent(); //Register will actually Initialize the Component
-}
-
-void APlaceableActorBase::DestroyClickableComponent()
-{
-	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::%d::DestroyClickableComponent()"), UniqueId));
-	if (ClickableComponent)
-	{
-		ClickableComponent->DestroyComponent();
-	}
-}
-
-void APlaceableActorBase::AttachPlaceableComponent()
-{
-	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::%d::AttachPlaceableComponent()"), UniqueId));
-	PlaceableComponent = NewObject<UPlaceableAComponent>(this, UPlaceableAComponent::StaticClass(), FName("Placeable Component"));
-	PlaceableComponent->RegisterComponent();
-}
-
-void APlaceableActorBase::DestroyPlaceableComponent()
-{
-	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::%d::DestroyPlaceableComponent()"), UniqueId));
-	if (PlaceableComponent)
-	{
-		PlaceableComponent->DestroyComponent();
-	}
+	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::BeginPlay()")));
 }
 
 void APlaceableActorBase::OnActorPlaced()
 {
-	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::%d::OnActorPlaced()"), UniqueId));
+	GLog->Log(FString::Printf(TEXT("APlaceableActorBase::OnActorPlaced()")));
 	//Placement Confirmed, update Neighbor Cells
 	BaseCell->OnActorPlaced(this);
 }

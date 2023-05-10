@@ -14,7 +14,6 @@ class CITYBUILDING_API AHouseTileActor : public APlaceableActorBase
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 public:	
 	// Sets default values for this actor's properties
 	AHouseTileActor();
@@ -23,4 +22,14 @@ public:
 	class UStaticMeshComponent* TileBaseMesh;
 
 	virtual void SetMaterial(UMaterialInterface*) override;
+
+	const FVector GetRandomVector() const
+	{
+		return { RandomFloat() , RandomFloat() , RandomFloat() };
+	}
+
+	const float RandomFloat() const
+	{
+		return FMath::RandRange(0.5f, 0.9f);
+	}
 };

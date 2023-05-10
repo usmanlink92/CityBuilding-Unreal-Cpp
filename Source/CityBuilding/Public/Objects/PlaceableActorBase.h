@@ -14,37 +14,21 @@ class CITYBUILDING_API APlaceableActorBase : public AActor
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 public:	
 	// Sets default values for this actor's properties
 	APlaceableActorBase();
 
-	void AttachClickableComponent();
-	void DestroyClickableComponent();
-	void AttachPlaceableComponent();
-	void DestroyPlaceableComponent();
-
 	void OnActorPlaced();
 	
+	class AGridCellActor* BaseCell;
 
+	//Every Child Class will set/use this variable
 	UMaterialInterface* BaseMaterial;
 	virtual void SetMaterial(UMaterialInterface* Material) { BaseMaterial = Material; };
 
-	uint8 OverlappedActorsCount = 0;
-
 	bool IsPlacementValid = false;
-	class UClickableAComponent* ClickableComponent;
-	class UPlaceableAComponent* PlaceableComponent;
-	class AGridCellActor* BaseCell;
 
 	//This is set on SpawnActor
 	EBuildingType BuildingType = EBuildingType::E_None;
-
-private:
-	int32 UniqueId = 0;
-	UFUNCTION()
-	void OnActorOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
-	UFUNCTION()
-	void OnActorOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
 };

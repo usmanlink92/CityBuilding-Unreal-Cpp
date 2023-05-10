@@ -9,7 +9,7 @@
 ARoadTileActor::ARoadTileActor() : Super()
 {
 	GLog->Log(FString::Printf(TEXT("ARoadTileActor::ARoadTileActor()")));
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	TileBaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TileBaseMesh"));
@@ -91,13 +91,6 @@ void ARoadTileActor::BeginPlay()
 	Super::BeginPlay();
 	GLog->Log(FString::Printf(TEXT("ARoadTileActor::BeginPlay()")));
 }
-
-// Called every frame
-void ARoadTileActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 void ARoadTileActor::SetMaterial(UMaterialInterface* Material)
 {
 	if (BaseMaterial != Material)
@@ -106,9 +99,3 @@ void ARoadTileActor::SetMaterial(UMaterialInterface* Material)
 		TileBaseMesh->SetMaterial(0, BaseMaterial);
 	}
 }
-
-//void ARoadTileActor::RoadAtNorth()
-//{
-//	GLog->Log(FString::Printf(TEXT("ARoadTileActor::RoadAtNorth()")));
-//
-//}

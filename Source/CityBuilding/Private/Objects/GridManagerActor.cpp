@@ -45,7 +45,7 @@ void AGridManagerActor::PopulateGrid()
 	}
 }
 
-AActor* AGridManagerActor::GetClosestPosition(const FVector InPosition)
+AActor* AGridManagerActor::GetClosestPosition(const FVector& InPosition)
 {
 	//GLog->Log(FString::Printf(TEXT("AGridManagerActor::GetClosestPosition(%f, %f, %f)"), InPosition.X, InPosition.Y, InPosition.Z));
 	AActor* CellRef = Grid.Num() > 0 ? Grid[0] : nullptr;

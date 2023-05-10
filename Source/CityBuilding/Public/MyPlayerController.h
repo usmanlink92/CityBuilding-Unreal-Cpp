@@ -30,6 +30,8 @@ class AMyPlayerController : public APlayerController
     void StopMoveLeft();
     void ScrollUp();
     void ScrollDown();
+    void LeftMousePressed();
+    void LeftMouseReleased();
     void MiddleMousePressed();
     void MiddleMouseReleased();
     void MouseX(float);
@@ -38,8 +40,11 @@ class AMyPlayerController : public APlayerController
     void DropActorAtLocation();
     void UpdatePosition();
 
+    bool LeftMousePress = false;
     bool MiddleMousePress = false;
     bool InPlacementMode = false;
+
+    EBuildingType BuildingType = EBuildingType::E_None;
 
     class AMyPawn* PlayerCharacter;
     class APlaceableActorBase* PlaceableActor;
@@ -49,6 +54,10 @@ class AMyPlayerController : public APlayerController
     FVector LastWorldDirection = FVector::ZeroVector;
 
 public:
+    void SetSpawnType(const EBuildingType& Type)
+    {
+        BuildingType = Type;
+    }
     void SpawnCustomActor(EBuildingType);
     void CancelActorSpawn();
 };

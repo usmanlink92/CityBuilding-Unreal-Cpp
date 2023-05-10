@@ -9,7 +9,7 @@
 AHouseTileActor::AHouseTileActor() : Super()
 {
 	GLog->Log(FString::Printf(TEXT("AHouseTileActor::AHouseTileActor()")));
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	TileBaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TileBaseMesh"));
@@ -17,10 +17,8 @@ AHouseTileActor::AHouseTileActor() : Super()
 	TileBaseMesh->SetStaticMesh(UConstants::GetMesh());
 	TileBaseMesh->SetMaterial(0, UConstants::GetMaterial(EColors::E_Red));
 	TileBaseMesh->SetWorldLocation({0.f, 0.f, -1.9f});
-	TileBaseMesh->SetWorldScale3D({1.f, 1.f, 1.f});
+	TileBaseMesh->SetWorldScale3D(GetRandomVector());
 	TileBaseMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
-
-	
 }
 
 // Called when the game starts or when spawned
@@ -28,12 +26,6 @@ void AHouseTileActor::BeginPlay()
 {
 	Super::BeginPlay();
 	GLog->Log(FString::Printf(TEXT("AHouseTileActor::BeginPlay()")));
-}
-
-// Called every frame
-void AHouseTileActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void AHouseTileActor::SetMaterial(UMaterialInterface* Material)

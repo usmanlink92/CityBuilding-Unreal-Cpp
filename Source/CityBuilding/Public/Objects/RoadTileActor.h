@@ -14,7 +14,6 @@ class CITYBUILDING_API ARoadTileActor : public APlaceableActorBase
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 public:	
 	// Sets default values for this actor's properties
 	ARoadTileActor();
@@ -39,5 +38,4 @@ public:
 	class UStaticMeshComponent* NWPavement;
 
 	virtual void SetMaterial(UMaterialInterface*) override;
-	//virtual void RoadAtNorth() override;
 };

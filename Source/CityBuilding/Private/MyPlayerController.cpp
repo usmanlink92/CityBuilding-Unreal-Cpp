@@ -3,12 +3,11 @@
 
 #include "MyPlayerController.h"
 #include "MyPawn.h"
-#include "Objects/MyBuildingActor.h"
+
 #include "Objects/RoadTileActor.h"
 #include "Objects/HouseTileActor.h"
 #include "Objects/GridManagerActor.h"
 #include "Objects/GridCellActor.h"
-#include "Components/PlaceableAComponent.h"
 
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -28,9 +27,16 @@ void AMyPlayerController::BeginPlay()
 void AMyPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    if (!InPlacementMode && LeftMousePress)
+    {
+        SpawnCustomActor(BuildingType);
+    }
+
     if (InPlacementMode)
     {
         UpdatePosition();
+        DropActorAtLocation();
     }
 }
 
@@ -39,7 +45,6 @@ void AMyPlayerController::BeginPlayingState()
     GLog->Log(TEXT("AMyPlayerController::BeginPlayingState()"));
     Super::BeginPlayingState();
     PlayerCharacter = Cast<AMyPawn>(GetPawn());
-
 }
 
 void AMyPlayerController::SetupInputComponent()
@@ -62,8 +67,8 @@ void AMyPlayerController::SetupInputComponent()
     InputComponent->BindAction("MiddleMouse", IE_Pressed, this, &AMyPlayerController::MiddleMousePressed);
     InputComponent->BindAction("MiddleMouse", IE_Released, this, &AMyPlayerController::MiddleMouseReleased);
 
-    //InputComponent->BindAction("SpawnBuilding", IE_Released, this, &AMyPlayerController::SpawnCustomActor);
-    InputComponent->BindAction("MouseLeftCLick", IE_Released, this, &AMyPlayerController::DropActorAtLocation);
+    InputComponent->BindAction("MouseLeftCLick", IE_Pressed, this, &AMyPlayerController::LeftMousePressed);
+    InputComponent->BindAction("MouseLeftCLick", IE_Released, this, &AMyPlayerController::LeftMouseReleased);
     InputComponent->BindAction("MouseRightClick", IE_Released, this, &AMyPlayerController::CancelActorSpawn);
 
     InputComponent->BindAxis("MouseX", this, &AMyPlayerController::MouseX);
@@ -84,6 +89,23 @@ void AMyPlayerController::MouseY(float y)
     {
         AddPitchInput(-y * 5.f);
     }
+}
+
+void AMyPlayerController::LeftMousePressed()
+{
+    GLog->Log(TEXT("AMyPlayerController::LeftMousePressed()"));
+    LeftMousePress = true;
+    if (BuildingType != EBuildingType::E_None)
+    {
+        SpawnCustomActor(BuildingType);
+    }
+}
+
+void AMyPlayerController::LeftMouseReleased()
+{
+    GLog->Log(TEXT("AMyPlayerController::LeftMouseReleased()"));
+    LeftMousePress = false;
+    CancelActorSpawn();
 }
 
 void AMyPlayerController::MiddleMousePressed()
@@ -161,8 +183,9 @@ void AMyPlayerController::ScrollDown()
 void AMyPlayerController::SpawnCustomActor(EBuildingType Type)
 {
     GLog->Log(TEXT("AMyPlayerController::SpawnCustomActor()"));
-    if (!InPlacementMode)
+    if (!InPlacementMode && Type != EBuildingType::E_None)
     {
+        InPlacementMode = true;
         FActorSpawnParameters SpawnParams;
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         FVector _SpawnLocation = FVector::ZeroVector;
@@ -180,7 +203,6 @@ void AMyPlayerController::SpawnCustomActor(EBuildingType Type)
         }
         PlaceableActor = GetWorld()->SpawnActor<APlaceableActorBase>(PlaceableActorClassType, _SpawnLocation, FRotator::ZeroRotator, SpawnParams);
         PlaceableActor->BuildingType = Type;
-        InPlacementMode = true;
     }
 }
 
@@ -202,6 +224,7 @@ void AMyPlayerController::CancelActorSpawn()
     {
         InPlacementMode = false;
         PlaceableActor->Destroy();
+        PlaceableActor = nullptr;
     }
 }
 
@@ -218,12 +241,14 @@ void AMyPlayerController::UpdatePosition()
         {
             if (OutHit.bBlockingHit)
             {
-                GLog->Log(TEXT("AMyPlayerController::SetActorLocation()"));
-                //BaseCellToBe : Will be NULL only if Grid Manager have nothing / have zero cells
+                //GLog->Log(TEXT("AMyPlayerController::SetActorLocation()"));
+                //BaseCellToBe : Will be NULL only if Grid Manager have nothing / have zero cells / No need to check null
                 AGridCellActor* BaseCellToBe = Cast<AGridCellActor>(GridManagerActor->GetClosestPosition(OutHit.Location));
                 if(BaseCellToBe->CellValidForType(PlaceableActor->BuildingType))
                 {
                     //This 'if' cannot be combined with upper one, as upper one decides to return
+
+                    //If same position, then no need to update Location
                     if (PlaceableActor->BaseCell != BaseCellToBe)
                     {
                         PlaceableActor->BaseCell = BaseCellToBe;
@@ -237,11 +262,12 @@ void AMyPlayerController::UpdatePosition()
                     }
                     return;
                 }
-                //Set invalid Location, with red color
+                //Set invalid Location, with red color, below code will also run
                 PlaceableActor->SetActorLocation(OutHit.Location);
             }
         }
 
+        //When LineTrace is false
         if (PlaceableActor->IsPlacementValid)
         {
             PlaceableActor->IsPlacementValid = false;

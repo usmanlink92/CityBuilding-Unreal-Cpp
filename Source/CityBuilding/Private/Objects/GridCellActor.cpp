@@ -17,7 +17,7 @@ AGridCellActor::AGridCellActor()
 void AGridCellActor::BeginPlay()
 {
 	Super::BeginPlay();
-	//GLog->Log(FString::Printf(TEXT("AGridCellActor::BeginPlay()")));
+	GLog->Log(FString::Printf(TEXT("AGridCellActor::BeginPlay()")));
 }
 
 // Called every frame
@@ -47,13 +47,14 @@ void AGridCellActor::OnActorPlaced(APlaceableActorBase* Building)
 	SetNeighborAvaiablility(West, EBuildingType::E_House);
 
 	//Set Road Pavement Visibility
+	//Using 'this' because Accessing same variable from other object of same type
 	switch (BuildingType)
 	{
 	case EBuildingType::E_Road:
 	{
 		if (North && North->OccupyingActor && North->BuildingType == BuildingType)
 		{
-			if (ARoadTileActor* Self = Cast<ARoadTileActor>(OccupyingActor))
+			if (ARoadTileActor* Self = Cast<ARoadTileActor>(this->OccupyingActor))
 			{
 				if (ARoadTileActor* NorthX = Cast<ARoadTileActor>(North->OccupyingActor))
 				{
@@ -64,7 +65,7 @@ void AGridCellActor::OnActorPlaced(APlaceableActorBase* Building)
 		}
 		if (South && South->OccupyingActor && South->BuildingType == BuildingType)
 		{
-			if (ARoadTileActor* Self = Cast<ARoadTileActor>(OccupyingActor))
+			if (ARoadTileActor* Self = Cast<ARoadTileActor>(this->OccupyingActor))
 			{
 				if (ARoadTileActor* SouthX = Cast<ARoadTileActor>(South->OccupyingActor))
 				{
@@ -75,7 +76,7 @@ void AGridCellActor::OnActorPlaced(APlaceableActorBase* Building)
 		}
 		if (East && East->OccupyingActor && East->BuildingType == BuildingType)
 		{
-			if (ARoadTileActor* Self = Cast<ARoadTileActor>(OccupyingActor))
+			if (ARoadTileActor* Self = Cast<ARoadTileActor>(this->OccupyingActor))
 			{
 				if (ARoadTileActor* EastX = Cast<ARoadTileActor>(East->OccupyingActor))
 				{
@@ -86,7 +87,7 @@ void AGridCellActor::OnActorPlaced(APlaceableActorBase* Building)
 		}
 		if (West && West->OccupyingActor && West->BuildingType == BuildingType)
 		{
-			if (ARoadTileActor* Self = Cast<ARoadTileActor>(OccupyingActor))
+			if (ARoadTileActor* Self = Cast<ARoadTileActor>(this->OccupyingActor))
 			{
 				if (ARoadTileActor* WestX = Cast<ARoadTileActor>(West->OccupyingActor))
 				{
