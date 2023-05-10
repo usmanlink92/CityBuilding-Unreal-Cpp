@@ -46,7 +46,7 @@ public:
 private:
 	void SetDefaults();
 	void UpdateMoveSpeed();
-	FVector CurrentVelocity;
+	FVector CurrentVelocity = FVector::ZeroVector; //Per tick movement to update
 	FRotator SpringArmWorldRotation = FRotator::ZeroRotator;
 	float MoveSpeed = 100.f;
 	bool InvertedMouse = false;

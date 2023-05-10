@@ -16,6 +16,7 @@ AMyBuildingActor::AMyBuildingActor()
 
     //static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMeshFinder(TEXT("/Game/Objects/MyCube")); // This can also be used for getting reference of UASSETS // Need to access Like: CubeMeshFinder.Object
 	DefaultMaterial = Cast<UMaterialInterface>(StaticLoadObject(UMaterialInterface::StaticClass(), nullptr, TEXT("/Game/Materials/WhiteBase")));
+	BlackMaterial = Cast<UMaterialInterface>(StaticLoadObject(UMaterialInterface::StaticClass(), nullptr, TEXT("/Game/Materials/BlackBase")));
 	DefaultMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, TEXT("/Game/Objects/MyCube")));
 	
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));

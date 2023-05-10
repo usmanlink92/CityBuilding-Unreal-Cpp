@@ -12,8 +12,8 @@ AMyPawn::AMyPawn()
     SetDefaults();
     // Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-    bUseControllerRotationPitch = false;
-    bUseControllerRotationRoll = false;
+    bUseControllerRotationPitch = true;
+    bUseControllerRotationRoll = true;
     bUseControllerRotationYaw = true;
 
     CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RootCapsule"));
@@ -31,11 +31,11 @@ AMyPawn::AMyPawn()
 	SpringArm->TargetArmLength = SpringArmLength;
 	const FRotator& CurrentRotation = GetActorRotation();
 	SpringArm->SetWorldRotation(SpringArmWorldRotation);
-	//SpringArm->bUsePawnControlRotation = true;
+	SpringArm->bUsePawnControlRotation = false;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-	Camera->bUsePawnControlRotation = true;
+	Camera->bUsePawnControlRotation = false;
 }
 
 void AMyPawn::SetDefaults()

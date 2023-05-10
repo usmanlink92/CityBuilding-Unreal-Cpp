@@ -15,7 +15,7 @@ class AMyPlayerController : public APlayerController
 	GENERATED_BODY()
 
     virtual void BeginPlay() override;
-    virtual void Tick(float DeltaTime) override;
+    virtual void Tick(float) override;
     virtual void BeginPlayingState() override;
     virtual void SetupInputComponent() override;
 
@@ -31,17 +31,22 @@ class AMyPlayerController : public APlayerController
     void ScrollDown();
     void MiddleMousePressed();
     void MiddleMouseReleased();
-    void MouseX(float x);
-    void MouseY(float y);
+    void MouseX(float);
+    void MouseY(float);
 
     void SpawnCustomActor();
     void DropActorAtLocation();
     void CancelActorSpawn();
     void UpdatePosition();
+    void OnActorPlaced(class AMyBuildingActor*);
 
     bool MiddleMousePress = false;
     bool InPlacementMode = false;
 
     class AMyPawn* PlayerCharacter;
     class AMyBuildingActor* PlaceableActor;
+    class AGridManagerActor* GridManagerActor;
+
+    FVector LastWorldLocation = FVector::ZeroVector;
+    FVector LastWorldDirection = FVector::ZeroVector;
 };

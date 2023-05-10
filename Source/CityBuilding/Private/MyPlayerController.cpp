@@ -5,6 +5,11 @@
 #include "MyPawn.h"
 #include "Objects/MyBuildingActor.h"
 #include "Components/PlaceableAComponent.h"
+#include "Objects/GridManagerActor.h"
+#include "Objects/GridCellActor.h"
+
+#include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 
 void AMyPlayerController::BeginPlay()
 {
@@ -13,6 +18,8 @@ void AMyPlayerController::BeginPlay()
     bShowMouseCursor = true;
     bEnableClickEvents = true;
     bEnableMouseOverEvents = true;
+
+    GridManagerActor = Cast<AGridManagerActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGridManagerActor::StaticClass()));
 }
 
 // Called every frame
@@ -73,7 +80,7 @@ void AMyPlayerController::MouseY(float y)
 {
     if (MiddleMousePress)
     {
-        PlayerCharacter->UpdateSpringArmPitch(-y * 5.f);
+        AddPitchInput(-y * 5.f);
     }
 }
 
@@ -172,6 +179,7 @@ void AMyPlayerController::DropActorAtLocation()
         InPlacementMode = false;
         PlaceableActor->DestroyPlaceableComponent();
         PlaceableActor->AttachClickableComponent();
+        OnActorPlaced(PlaceableActor);
     }
 }
 
@@ -191,14 +199,43 @@ void AMyPlayerController::UpdatePosition()
     FVector WorldLocation;
     FVector WorldDirection;
     FHitResult OutHit;
-    if (DeprojectMousePositionToWorld(WorldLocation, WorldDirection))
+    if (DeprojectMousePositionToWorld(WorldLocation, WorldDirection) && (WorldLocation != LastWorldLocation || WorldDirection != LastWorldDirection))
     {
+        LastWorldLocation = WorldLocation;
+        LastWorldDirection = WorldDirection;
         if (GetWorld()->LineTraceSingleByChannel(OutHit, WorldLocation, (WorldLocation + (WorldDirection * 50000)), ECollisionChannel::ECC_GameTraceChannel1))
         {
             if (OutHit.bBlockingHit)
             {
-                PlaceableActor->SetActorLocation(OutHit.Location);
+                if (GridManagerActor)
+                {
+                    GLog->Log(TEXT("AMyPlayerController::SetActorLocation()"));
+                    PlaceableActor->BaseCell = Cast<AGridCellActor>(GridManagerActor->GetClosestPosition(OutHit.Location));
+                    if (PlaceableActor->BaseCell)
+                    {
+                        PlaceableActor->SetActorLocation(PlaceableActor->BaseCell->GetActorLocation());
+                    }
+                    else
+                    {
+                        PlaceableActor->SetActorLocation(OutHit.Location);
+                    }
+                }
+                else
+                {
+                    PlaceableActor->SetActorLocation(OutHit.Location);
+                }
             }
         }
     }
+}
+
+void AMyPlayerController::OnActorPlaced(AMyBuildingActor* Building)
+{
+    GLog->Log(TEXT("AMyPlayerController::OnActorPlaced()"));
+    if(Building->BaseCell->North)Building->BaseCell->North->Mesh->SetMaterial(0, Building->BaseCell->BlackMaterial);
+    if(Building->BaseCell->South)Building->BaseCell->South->Mesh->SetMaterial(0, Building->BaseCell->BlackMaterial);
+    if(Building->BaseCell->East)Building->BaseCell->East->Mesh->SetMaterial(0, Building->BaseCell->BlackMaterial);
+    if(Building->BaseCell->West)Building->BaseCell->West->Mesh->SetMaterial(0, Building->BaseCell->BlackMaterial);
+    Building->BaseCell->OccupyingActor = Building;
+    Building->BaseCell->BuildingType = EBuildingType::E_House;
 }
